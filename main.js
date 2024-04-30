@@ -1,13 +1,14 @@
 const { app, BrowserWindow } = require('electron')
 const express = require('express')
 const path = require('path')
+const db = require('./db')
 
 const app_express = express()
 app_express.use(express.static(path.join(__dirname, 'front-end')))
 
 // Define uma rota básica
 app_express.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname,'front-end', 'index.html'));
+    res.sendFile(path.join(__dirname, 'front-end', 'index.html'));
 });
 
 // Inicia o servidor Express em uma porta
