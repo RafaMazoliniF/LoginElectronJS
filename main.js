@@ -1,7 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const express = require('express')
 const path = require('path')
-const db = require('./db')
 
 const app_express = express()
 app_express.use(express.static(path.join(__dirname, 'front-end')))
