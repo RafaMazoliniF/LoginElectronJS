@@ -1,12 +1,53 @@
-version: '3.9' 
+version: '3.9' # Versão do Docker Compose
 
+# Todos os containers que vamos subir
 services:
-
+  # Este é o do postgres, podemos dar o nome que quisermos
   postgres:
-    image: postgres
+    build: . # A imagem dele é a nossa personalizada presente
     ports:
       - 5432:5432
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+
+  # Este é do pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 15432:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=rafaelmazolinif@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    entrypoint: /bin/sh -c "chmod 600 /pgpass; /entrypoint.sh"
+    user: root
+    configs:
+      - source: servers.json
+        target: /pgadmin4/servers.json
+      - source: pgpass
+        target: /pgpass
+
+# Configurações personalizadas que chamamos no serviço do pgAdmin
+configs:
+  pgpass:
+    content: db:5432:*:postgres:postgres
+  servers.json:
+    # Esse é o nosso arquivo json que o pgAdmin usa para fazer a conexão com o servidor postgres
+    content: |
+      {
+        "Servers": {
+          "1": {
+            "Group": "Servers",
+            "Name": "postgres",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "postgres",
+            "Username": "postgres",
+            "PassFile": "/pgpass",  
+            "SSLMode": "prefer"
+          }
+        }
+      }
