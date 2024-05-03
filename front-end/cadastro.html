@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cadastro de Usuário</h2>
+        <form id="cadastroForm" onsubmit="return false;">
+            <label for="username">Usuário:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="cep">CEP:</label>
+            <input type="number" id="cep" name="cep" required onblur="pesquisacep(this.value)">
+            <label for="rua">Rua:</label>
+            <input type="text" id="rua" name="rua" required>
+            <label for="bairro">Bairro:</label>
+            <input type="text" id="bairro" name="bairro" required>
+            <label for="cidade">Cidade:</label>
+            <input type="text" id="cidade" name="cidade" required>
+            <label for="estado">Estado:</label>
+            <input type="text" id="estado" name="estado" required>
+            <input type="submit" value="Cadastrar" onclick="cadastrarUsuario()">
+        </form>
+    </div>
+
+    <script>
+        async function cadastrarUsuario() {
+            const form = document.getElementById('cadastroForm');
+            const username = form.username.value;
+            const password = form.password.value;
+            const cep = form.cep.value;
+            const rua = form.rua.value;
+            const bairro = form.bairro.value;
+            const cidade = form.cidade.value;
+            const estado = form.estado.value;
+
+            const response = await fetch('/cadastrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    password,
+                    cep,
+                    rua,
+                    bairro,
+                    cidade,
+                    estado
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Usuário cadastrado com sucesso!');
+                // Redirecionar para outra página, se necessário
+                window.location.href = '/login.html';
+            } else {
+                alert('Erro ao cadastrar usuário. Por favor, tente novamente.');
+            }
+        }
+
+        function limpa_formulario_cep() {
+            document.getElementById('rua').value = "";
+            document.getElementById('bairro').value = "";
+            document.getElementById('cidade').value = "";
+            document.getElementById('estado').value = "";
+        }
+
+        function meu_callback(conteudo) {
+            if (!("erro" in conteudo)) {
+                document.getElementById('rua').value = (conteudo.logradouro);
+                document.getElementById('bairro').value = (conteudo.bairro);
+                document.getElementById('cidade').value = (conteudo.localidade);
+                document.getElementById('estado').value = (conteudo.uf);
+            } else {
+                limpa_formulario_cep();
+                alert("CEP não encontrado.");
+            }
+        }
+
+        function pesquisacep(valor) {
+            var cep = valor.replace(/\D/g, '');
+            if (cep != "") {
+                var validacep = /^[0-9]{8}$/;
+                if (validacep.test(cep)) {
+                    document.getElementById('rua').value = "...";
+                    document.getElementById('bairro').value = "...";
+                    document.getElementById('cidade').value = "...";
+                    document.getElementById('estado').value = "...";
+                    var script = document.createElement('script');
+                    script.src = 'https://viacep.com.br/ws/' + cep + '/json/?callback=meu_callback';
+                    document.body.appendChild(script);
+                } else {
+                    limpa_formulario_cep();
+                    alert("Formato de CEP inválido.");
+                }
+            } else {
+                limpa_formulario_cep();
+            }
+        };
+    </script>
+</body>
+</html>
